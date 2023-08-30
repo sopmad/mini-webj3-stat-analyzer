@@ -20,7 +20,7 @@ app.get("/block", (req, res) => {
 
 app.get("/transaction", (req, res) => {
   res.send("getting transaction!");
-  const address = prompt("Enter address: ");
+  const address = prompt("Enter TxHash: ");
   fetchTransactionData(address);
   // TODO: convert to proper html interface
 });
@@ -54,8 +54,8 @@ async function main() {
 
 const getEthStats = async (pain) => {
   const gasPrice = await web3.eth.getGasPrice(); //average gas price
-  const currentBlock = await web3.eth.getBlock("latest");
-  // const currentBlock = await web3.eth.getBlock(pain);
+  // const currentBlock = await web3.eth.getBlock("latest");
+  const currentBlock = await web3.eth.getBlock(pain);
   let result = null;
   //only when block is mined not pending
   if (currentBlock.number !== null) {
@@ -88,9 +88,23 @@ const printStats = async (pain) => {
   }
 };
 
-async function fetchTransactionData(address) {
-    var receipt = web3.eth.getTransactionReceipt(address).then(console.log);
-    return receipt;
+async function fetchTransactionData(txHash) {
+      try {
+        const transaction = await web3.eth.getTransaction(txHash);
+
+        console.log("Transaction Stats:");
+        console.log("From: ", transaction.from);
+        console.log("To: ", transaction.to);
+        console.log("Value: ", web3.utils.fromWei(transaction.value, "ether"), " ETH");
+        console.log("Gas Price: ", web3.utils.fromWei(transaction.gasPrice, "gwei"), " GWEI");
+        console.log("Gas Used: ", transaction.gas);
+        console.log("Transaction Status: ", transaction.blockHash ? "Confirmed" : "Pending");
+      } catch (error) {
+        console.error("Error:", error);
+      }
+
+    // var receipt = web3.eth.getTransactionReceipt(address).then(console.log);
+    // return receipt;
 }
 
 // printStats();
